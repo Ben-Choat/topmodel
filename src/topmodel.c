@@ -563,7 +563,13 @@ t0dt=(*t0)+log(dt);  /* was ALOG */
 
 /*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
 
+
+/////
+// only calculating values for tch[1] and tch[num_channels], and not for values of tch
+// between those two, does not affect results.
+
 tch[1]=dist_from_outlet[1]/chvdt;
+
 // for(j=2;j<=num_channels;j++)
 //  {
 //  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
@@ -585,14 +591,16 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
 // if(time>tch[num_channels]) {
 //	(*time_delay_histogram)[1] = 1.0;
 //	 }
-
+printf("\n\nnum_time_delay_histo_ords = %d\n\n", *num_time_delay_histo_ords);
  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
   {
 // ir =1; not looping through ir=1;ir<=num_time_delay_histo_ords;ir++ changes results
   time=(double)(*num_delay)+(double)ir;
+  printf("\n\ntime = %f\ntch[num_channels] = %f", time, tch[num_channels]);
+  printf("\nrequired condition is time>tch[num_channels]\n\n");
   if(time>tch[num_channels] && ir == 1) // NOTE - ONLY EDITING OUT FIRST VALUE DOES NOT CHANGE RESULTS
     {
-    (*time_delay_histogram)[ir]= 9999; // 1.0; // this condition is not met in my current set up 2023/09/13 4:15 pm
+    (*time_delay_histogram)[ir] = 9999; // 1.0; // this condition is not met in my current set up 2023/09/13 4:15 pm
 				       // I think editing this value when this condition is met may change the output of 
 				       // the first value of Q[it]
     }
