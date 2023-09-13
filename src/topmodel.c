@@ -308,12 +308,14 @@ if(irof==1) max_contrib_area=1.0;
 //---------------------------------------
 // Note: Loop count starts at 1, not 0!
 //---------------------------------------
-for(ir=1;ir<=num_time_delay_histo_ords;ir++)
-  {
-  in=it+num_delay+ir-1;
-  if(in>current_time_step) break;
-  Q[in]=(*Qout)*time_delay_histogram[ir];
-  }
+//for(ir=1;ir<=num_time_delay_histo_ords;ir++)
+//  {
+//  in=it+num_delay+ir-1;
+//  if(in>current_time_step) break;
+//  Q[in]=(*Qout)*time_delay_histogram[ir];
+//  }
+
+Q[1]=(*Qout)*time_delay_histogram[1];
 
 /* BMI Adaption: replace nstep with current_time_step */
 if(yes_print_output==TRUE && in<=current_time_step)
@@ -562,10 +564,11 @@ t0dt=(*t0)+log(dt);  /* was ALOG */
 /*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
 
 tch[1]=dist_from_outlet[1]/chvdt;
-for(j=2;j<=num_channels;j++)
-  {
-  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-  }
+// for(j=2;j<=num_channels;j++)
+//  {
+//  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+ tch[num_channels]=tch[1]+(dist_from_outlet[num_channels]-dist_from_outlet[1])/rvdt;
+//  }
 (*num_time_delay_histo_ords)=(int)tch[num_channels];
 
 
@@ -576,54 +579,65 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
 
 (*num_delay)=(int)tch[1];
 (*num_time_delay_histo_ords)-=(*num_delay);
-for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+
+////////////////////////////////
+// time = (double)(*num_delay) + 1;
+// if(time>tch[num_channels]) {
+//	(*time_delay_histogram)[1] = 1.0;
+//	 }
+
+ for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
   {
+// ir =1; not looping through ir=1;ir<=num_time_delay_histo_ords;ir++ changes results
   time=(double)(*num_delay)+(double)ir;
-  if(time>tch[num_channels])
+  if(time>tch[num_channels] && ir == 1) // NOTE - ONLY EDITING OUT FIRST VALUE DOES NOT CHANGE RESULTS
     {
-    (*time_delay_histogram)[ir]=1.0;
+    (*time_delay_histogram)[ir]= 9999; // 1.0; // this condition is not met in my current set up 2023/09/13 4:15 pm
+				       // I think editing this value when this condition is met may change the output of 
+				       // the first value of Q[it]
     }
-  else
-    {
-    for(j=2;j<=num_channels;j++)
-      {
-      if(time<=tch[j])
-        {
-        (*time_delay_histogram)[ir]=
-             cum_dist_area_with_dist[j-1]+
-                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
-                              (time-tch[j-1])/(tch[j]-tch[j-1]);
-        break;  /* exits this for loop */
-        }
-      }
-    }
+//  else
+//    {
+//    for(j=2;j<=num_channels;j++)
+//      {
+//      if(time<=tch[j])
+//        {
+//	    (*time_delay_histogram)[ir] = 999999;
+////        (*time_delay_histogram)[ir]=
+////             cum_dist_area_with_dist[j-1]+
+////                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
+////                              (time-tch[j-1])/(tch[j]-tch[j-1]);
+//        break;  /* exits this for loop */
+//        }
+//      }
+//    }
   }
-a1=(*time_delay_histogram)[1];
-sumar=(*time_delay_histogram)[1];
-(*time_delay_histogram)[1]*=area;
-if((*num_time_delay_histo_ords)>1)
-  {
-  for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
-    {
-    a2=(*time_delay_histogram)[ir];
-    (*time_delay_histogram)[ir]=a2-a1;
-    a1=a2;
-    sumar+=(*time_delay_histogram)[ir];
-    (*time_delay_histogram)[ir]*=area;
-    }
-  }
-if(yes_print_output==TRUE)
-  {
-  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
-  fprintf(output_fptr,"Subcatchment routing data:\n");
-  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
-  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
-  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
-    {
-    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
-    }
-  fprintf(output_fptr,"\n");
-  }
+//a1=(*time_delay_histogram)[1];
+//sumar=(*time_delay_histogram)[1];
+//(*time_delay_histogram)[1]*=area;
+//if((*num_time_delay_histo_ords)>1)
+//  {
+//  for(ir=2;ir<=(*num_time_delay_histo_ords);ir++)
+//    {
+//    a2=(*time_delay_histogram)[ir];
+//    (*time_delay_histogram)[ir]=a2-a1;
+//    a1=a2;
+//    sumar+=(*time_delay_histogram)[ir];
+//    (*time_delay_histogram)[ir]*=area;
+//    }
+//  }
+//if(yes_print_output==TRUE)
+//  {
+//  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
+//  fprintf(output_fptr,"Subcatchment routing data:\n");
+//  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
+//  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
+//  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+//    {
+//    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
+//    }
+//  fprintf(output_fptr,"\n");
+//  }
 
 /*  INITIALISE deficit_root_zone AND Q0 VALUES HERE
  *  SR0 IS INITIAL ROOT ZONE STORAGE DEFICIT BELOW FIELD CAPACITY
@@ -639,18 +653,34 @@ for(ia=1;ia<=num_topodex_values;ia++)
 
 /*   Reinitialise discharge array */
 sum=0.0;
-for(i=1;i<=(*num_delay);i++)
-  {
-  Q[i]+=(*Q0)*area;
-  }
+
+//// TROUBLESHOOTING
+if(*num_delay > 1) {
+	Q[1] = (*Q0)*area;
+}
+else {
+	Q[1] = 0;
+}
+
+//if (
+//	sum+=(*time_delay_histogram)[1]
+//	Q[1] = 
+//
+
+/////////////////////////////////
+
+//for(i=1;i<=(*num_delay);i++)
+//  {
+//  Q[i]+=(*Q0)*area;
+//  }
       
-for(i=1;i<=(*num_time_delay_histo_ords);i++)
-  {
-  sum+=(*time_delay_histogram)[i];
-  in=(*num_delay)+i;
-  Q[in]+=(*Q0)*(area-sum);
-  }
-      
+//for(i=1;i<=(*num_time_delay_histo_ords);i++)
+//  {
+//  sum+=(*time_delay_histogram)[i];
+//  in=(*num_delay)+i;
+//  Q[in]+=(*Q0)*(area-sum);
+//  }
+//      
 /*  Initialise water balance.  BAL is positive for storage */
 (*bal)=-(*sbar)-(*sr0);
 if(yes_print_output==TRUE)
