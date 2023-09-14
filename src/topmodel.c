@@ -574,10 +574,9 @@ t0dt=(*t0)+log(dt);  /* was ALOG */
 /*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
 
 tch[1]=dist_from_outlet[1]/chvdt;
-for(j=2;j<=num_channels;j++)
-  {
-  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
-  }
+ for(j=2;j<=num_channels;j++) {
+      tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+ }
 (*num_time_delay_histo_ords)=(int)tch[num_channels];
 
 
@@ -593,6 +592,8 @@ printf("\n\nnum_time_delay_histo_ords = %d\n\n", *num_time_delay_histo_ords);
 
 for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
   {
+    printf("\ntch[%d]\n = %f", ir, tch[ir]);
+
   time=(double)(*num_delay)+(double)ir;
 
   printf("\n\ntime = %f\ntch[num_channels] = %f", time, tch[num_channels]);
@@ -609,10 +610,11 @@ for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
   else
     {
     for(j=2;j<=num_channels;j++)
-      {
-      printf("\ntch[%d]\n = %f", j, tch[j]);
+     {
+      //      printf("\ntch[1] = %f", tch[1]);
+//      printf("\ntch[num_channels] = %f", tch[num_channels]);
       printf("\ncondition is time<-tch[j]\n"); // this condition is met
-      if(time<=tch[j])
+      if(time<=tch[num_channels])
         {
 	printf("\n\nTime<=tch[j] met\n\n");
         if (ir == 1) {
@@ -622,12 +624,12 @@ for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
                               (time-tch[j-1])/(tch[j]-tch[j-1]);
 	} // else {
 	   //    (*time_delay_histogram)[ir] = 999999;	
-//	}
+	}
         break;  /* exits this for loop */
         }
       }
     }
-  }
+//  }
 //a1=(*time_delay_histogram)[1];
 //sumar=(*time_delay_histogram)[1];
 //(*time_delay_histogram)[1]*=area;
