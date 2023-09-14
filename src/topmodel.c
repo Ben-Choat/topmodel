@@ -644,18 +644,18 @@ for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
 //    (*time_delay_histogram)[ir]*=area;
 //    }
 //  }
-//if(yes_print_output==TRUE)
-//  {
-//  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
-//  fprintf(output_fptr,"Subcatchment routing data:\n");
-//  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
-//  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
-//  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
-//    {
-//    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
-//    }
-//  fprintf(output_fptr,"\n");
-//  }
+if(yes_print_output==TRUE)
+  {
+  fprintf(output_fptr,"SZQ =  %12.5lf\n",(*szq));
+  fprintf(output_fptr,"Subcatchment routing data:\n");
+  fprintf(output_fptr,"Maximum Routing Delay  %12.5lf\n",tch[num_channels]);
+  fprintf(output_fptr,"Sum of Histogram ordinates: %10.4lf\n",sumar);
+  for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+    {
+    fprintf(output_fptr,"%12.5lf ",(*time_delay_histogram)[ir]);
+    }
+  fprintf(output_fptr,"\n");
+  }
 //
 /*  INITIALISE deficit_root_zone AND Q0 VALUES HERE
  *  SR0 IS INITIAL ROOT ZONE STORAGE DEFICIT BELOW FIELD CAPACITY
