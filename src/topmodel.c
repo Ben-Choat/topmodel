@@ -308,15 +308,25 @@ if(irof==1) max_contrib_area=1.0;
 //---------------------------------------
 // Note: Loop count starts at 1, not 0!
 //---------------------------------------
-//for(ir=1;ir<=num_time_delay_histo_ords;ir++)
-//  {
-//  in=it+num_delay+ir-1;
-//  if(in>current_time_step) break;
+for(ir=1;ir<=num_time_delay_histo_ords;ir++)
+  {
+//  printf("\n\nit = %d", it);
+//  printf("\n\nin = %d", in);
+//  printf("\n\nir = %d", ir);
+//  printf("\n\nnum_delay = %d\n", num_delay);
+
+  in=it+num_delay+ir-1;
+  if(in>current_time_step) break;
 //  Q[in]=(*Qout)*time_delay_histogram[ir];
-//  }
+  Q[1] = (*Qout)*time_delay_histogram[1];
+//  printf("\n\nQout = %f & Q[1] = %f\n\n", *Qout, Q[1]);
 
-Q[1]=(*Qout)*time_delay_histogram[1];
-
+  }
+// Q[1] = (*Qout)*time_delay_histogram[1];
+// int j;
+// for (j=1;j<=num_time_delay_histo_ords;j++) {
+// 	printf("\n\ntime_delay_histogram[%d] = %f \n\n", j, time_delay_histogram[j]);
+// }
 /* BMI Adaption: replace nstep with current_time_step */
 if(yes_print_output==TRUE && in<=current_time_step)
   { 
@@ -563,18 +573,11 @@ t0dt=(*t0)+log(dt);  /* was ALOG */
 
 /*  CONVERT DISTANCE/AREA FORM TO TIME DELAY HISTOGRAM ORDINATES */
 
-
-/////
-// only calculating values for tch[1] and tch[num_channels], and not for values of tch
-// between those two, does not affect results.
-
 tch[1]=dist_from_outlet[1]/chvdt;
-
-// for(j=2;j<=num_channels;j++)
-//  {
-//  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
- tch[num_channels]=tch[1]+(dist_from_outlet[num_channels]-dist_from_outlet[1])/rvdt;
-//  }
+for(j=2;j<=num_channels;j++)
+  {
+  tch[j]=tch[1]+(dist_from_outlet[j]-dist_from_outlet[1])/rvdt;
+  }
 (*num_time_delay_histo_ords)=(int)tch[num_channels];
 
 
@@ -586,39 +589,44 @@ if((double)(*num_time_delay_histo_ords)<tch[num_channels])
 (*num_delay)=(int)tch[1];
 (*num_time_delay_histo_ords)-=(*num_delay);
 
-////////////////////////////////
-// time = (double)(*num_delay) + 1;
-// if(time>tch[num_channels]) {
-//	(*time_delay_histogram)[1] = 1.0;
-//	 }
 printf("\n\nnum_time_delay_histo_ords = %d\n\n", *num_time_delay_histo_ords);
- for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
+
+for(ir=1;ir<=(*num_time_delay_histo_ords);ir++)
   {
-// ir =1; not looping through ir=1;ir<=num_time_delay_histo_ords;ir++ changes results
   time=(double)(*num_delay)+(double)ir;
+
   printf("\n\ntime = %f\ntch[num_channels] = %f", time, tch[num_channels]);
   printf("\nrequired condition is time>tch[num_channels]\n\n");
-  if(time>tch[num_channels] && ir == 1) // NOTE - ONLY EDITING OUT FIRST VALUE DOES NOT CHANGE RESULTS
+  if(time>tch[num_channels])
     {
-    (*time_delay_histogram)[ir] = 9999; // 1.0; // this condition is not met in my current set up 2023/09/13 4:15 pm
-				       // I think editing this value when this condition is met may change the output of 
-				       // the first value of Q[it]
-    }
-//  else
-//    {
-//    for(j=2;j<=num_channels;j++)
-//      {
-//      if(time<=tch[j])
-//        {
-//	    (*time_delay_histogram)[ir] = 999999;
-////        (*time_delay_histogram)[ir]=
-////             cum_dist_area_with_dist[j-1]+
-////                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
-////                              (time-tch[j-1])/(tch[j]-tch[j-1]);
-//        break;  /* exits this for loop */
-//        }
-//      }
+    printf("\n\nconditions time>tch[num+channels] met \n\n"); // this condition is not met
+    if(ir == 1) {
+    (*time_delay_histogram)[ir]=1.0;
+    } // else {
+	 //   (*time_delay_histogram)[ir] = 999999;
 //    }
+    }
+  else
+    {
+    for(j=2;j<=num_channels;j++)
+      {
+      printf("\ntch[%d]\n = %f", j, tch[j]);
+      printf("\ncondition is time<-tch[j]\n"); // this condition is met
+      if(time<=tch[j])
+        {
+	printf("\n\nTime<=tch[j] met\n\n");
+        if (ir == 1) {
+	(*time_delay_histogram)[ir]= 
+             cum_dist_area_with_dist[j-1]+
+                (cum_dist_area_with_dist[j]-cum_dist_area_with_dist[j-1])*
+                              (time-tch[j-1])/(tch[j]-tch[j-1]);
+	} // else {
+	   //    (*time_delay_histogram)[ir] = 999999;	
+//	}
+        break;  /* exits this for loop */
+        }
+      }
+    }
   }
 //a1=(*time_delay_histogram)[1];
 //sumar=(*time_delay_histogram)[1];
@@ -646,7 +654,7 @@ printf("\n\nnum_time_delay_histo_ords = %d\n\n", *num_time_delay_histo_ords);
 //    }
 //  fprintf(output_fptr,"\n");
 //  }
-
+//
 /*  INITIALISE deficit_root_zone AND Q0 VALUES HERE
  *  SR0 IS INITIAL ROOT ZONE STORAGE DEFICIT BELOW FIELD CAPACITY
  *  Q0 IS THE INITIAL DISCHARGE FOR THIS SUBCATCHMENT  
@@ -661,8 +669,18 @@ for(ia=1;ia<=num_topodex_values;ia++)
 
 /*   Reinitialise discharge array */
 sum=0.0;
+//for(i=1;i<=(*num_delay);i++)
+//  {
+//  Q[i]+=(*Q0)*area;
+//  }
+//      
+//for(i=1;i<=(*num_time_delay_histo_ords);i++)
+//  {
+//  sum+=(*time_delay_histogram)[i];
+//  in=(*num_delay)+i;
+//  Q[in]+=(*Q0)*(area-sum);
+//  }
 
-//// TROUBLESHOOTING
 if(*num_delay > 1) {
 	Q[1] = (*Q0)*area;
 }
@@ -670,25 +688,6 @@ else {
 	Q[1] = 0;
 }
 
-//if (
-//	sum+=(*time_delay_histogram)[1]
-//	Q[1] = 
-//
-
-/////////////////////////////////
-
-//for(i=1;i<=(*num_delay);i++)
-//  {
-//  Q[i]+=(*Q0)*area;
-//  }
-      
-//for(i=1;i<=(*num_time_delay_histo_ords);i++)
-//  {
-//  sum+=(*time_delay_histogram)[i];
-//  in=(*num_delay)+i;
-//  Q[in]+=(*Q0)*(area-sum);
-//  }
-//      
 /*  Initialise water balance.  BAL is positive for storage */
 (*bal)=-(*sbar)-(*sr0);
 if(yes_print_output==TRUE)
